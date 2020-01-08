@@ -1,0 +1,98 @@
+[
+	{
+		"Host": "jumpbox1",
+		"Config": {
+			"stricthostkeychecking": "no",
+			"globalknownhostsfile": "/dev/null",
+			"userknownhostsfile": "/dev/null",
+			"tcpkeepalive": "yes",
+			"connecttimeout": "10",
+			"connectionattempts": "3",
+			"serveraliveinterval": "60",
+			"serveralivecountmax": "5",
+			"hostname": "123.45.6.7",
+			"user": "centos",
+			"identityfile": "/home/rjeczalik/src/github.com/glaucusio/ssh/testdata/jumpbox1.pem"
+		}
+	},
+	{
+		"Host": "123\\.45\\.6\\.7",
+		"Config": {
+			"stricthostkeychecking": "no",
+			"globalknownhostsfile": "/dev/null",
+			"userknownhostsfile": "/dev/null",
+			"tcpkeepalive": "yes",
+			"connecttimeout": "10",
+			"connectionattempts": "3",
+			"serveraliveinterval": "60",
+			"serveralivecountmax": "5",
+			"hostname": "123.45.6.7",
+			"user": "centos",
+			"identityfile": "/home/rjeczalik/src/github.com/glaucusio/ssh/testdata/jumpbox1.pem"
+		}
+	},
+	{
+		"Host": "jumpbox2",
+		"Config": {
+			"stricthostkeychecking": "no",
+			"globalknownhostsfile": "/dev/null",
+			"userknownhostsfile": "/dev/null",
+			"tcpkeepalive": "yes",
+			"connecttimeout": "10",
+			"connectionattempts": "3",
+			"serveraliveinterval": "60",
+			"serveralivecountmax": "5",
+			"hostname": "123.45.6.8",
+			"user": "centos",
+			"identityfile": "/home/rjeczalik/src/github.com/glaucusio/ssh/testdata/jumpbox2.pem"
+		}
+	},
+	{
+		"Host": "123\\.45\\.6\\.8",
+		"Config": {
+			"stricthostkeychecking": "no",
+			"globalknownhostsfile": "/dev/null",
+			"userknownhostsfile": "/dev/null",
+			"tcpkeepalive": "yes",
+			"connecttimeout": "10",
+			"connectionattempts": "3",
+			"serveraliveinterval": "60",
+			"serveralivecountmax": "5",
+			"hostname": "123.45.6.8",
+			"user": "centos",
+			"identityfile": "/home/rjeczalik/src/github.com/glaucusio/ssh/testdata/jumpbox2.pem"
+		}
+	},
+	{
+		"Host": "jumpbox3",
+		"Config": {
+			"stricthostkeychecking": "no",
+			"globalknownhostsfile": "/dev/null",
+			"userknownhostsfile": "/dev/null",
+			"tcpkeepalive": "yes",
+			"connecttimeout": "10",
+			"connectionattempts": "6",
+			"serveraliveinterval": "120",
+			"serveralivecountmax": "10",
+			"hostname": "123.45.7.8",
+			"user": "centos",
+			"identityfile": "/home/rjeczalik/src/github.com/glaucusio/ssh/testdata/jumpbox3.pem"
+		}
+	},
+	{
+		"Host": "123\\.45\\.7\\.8",
+		"Config": {
+			"stricthostkeychecking": "no",
+			"globalknownhostsfile": "/dev/null",
+			"userknownhostsfile": "/dev/null",
+			"tcpkeepalive": "yes",
+			"connecttimeout": "10",
+			"connectionattempts": "6",
+			"serveraliveinterval": "120",
+			"serveralivecountmax": "10",
+			"hostname": "123.45.7.8",
+			"user": "centos",
+			"identityfile": "/home/rjeczalik/src/github.com/glaucusio/ssh/testdata/jumpbox3.pem"
+		}
+	}
+]
