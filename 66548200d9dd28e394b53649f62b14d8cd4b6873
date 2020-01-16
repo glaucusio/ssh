@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa06270c_5e0efbd2",
+        "filename": "client.go",
+        "patchSetId": 1
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 1016916
+      },
+      "writtenOn": "2020-01-16T09:19:03Z",
+      "side": 1,
+      "message": "This is wrong.",
+      "revId": "66548200d9dd28e394b53649f62b14d8cd4b6873",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8509762c_18753e0a",
+        "filename": "sshfile/config.go",
+        "patchSetId": 1
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1016916
+      },
+      "writtenOn": "2020-01-16T09:19:03Z",
+      "side": 1,
+      "message": "Missing runtime check.",
+      "revId": "66548200d9dd28e394b53649f62b14d8cd4b6873",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}
