@@ -1,12 +1,16 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
 
 	"github.com/glaucusio/ssh"
 	"github.com/glaucusio/ssh/sshfile"
+	"github.com/glaucusio/ssh/sshos"
+	"github.com/glaucusio/ssh/sshtrace"
+	"github.com/glaucusio/ssh/sshutil"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -20,46 +24,53 @@ func die(v interface{}) {
 type app struct {
 	configfile    string
 	identityfiles []string
+	options       []string
+	verbose       bool
 }
 
 func (a *app) register(f *pflag.FlagSet) {
-	f.StringVarP(&a.configfile, "config", "F", sshfile.DefaultConfig, "")
-	f.StringArrayVarP(&a.identityfiles, "identity", "i", sshfile.DefaultIdentity, "")
+	f.StringVarP(&a.configfile, "config", "F", "", "")
+	f.StringArrayVarP(&a.identityfiles, "identity", "i", nil, "")
+	f.StringArrayVarP(&a.options, "option", "o", nil, "")
+	f.BoolVarP(&a.verbose, "verbose", "v", false, "")
 }
 
 func (a *app) run(cmd *cobra.Command, args []string) error {
-	filecfg, err := a.parseConfigFile()
-	if err != nil {
-		return err
-	}
-
-	identity, err := sshfile.IdentityAuth(a.identityfiles...)
+	auth, err := sshfile.IdentityAuth(a.identityfiles...)
 	if err != nil && !errors.Is(err, sshfile.NoAuthMethods) {
 		return err
 	}
 
-	cfg := new(ssh.Config).
-		With(filecfg).
-		WithAuth(identity)
-
-	client, err := ssh.NewClient(cfg)
+	c, err := sshos.NewClient(a.configfile, a.options)
 	if err != nil {
 		return err
 	}
 
-	_ = client
+	if auth != nil {
+		c.ConfigCallback = sshutil.PatchCallback(c.ConfigCallback, func(_ context.Context, cfg *ssh.Config) error {
+			cfg.Auth = append(cfg.Auth, auth)
+			return nil
+		})
+	}
+
+	ctx := processContext()
+
+	if a.verbose {
+		ctx = sshtrace.WithClientTrace(ctx, sshtrace.Debug("/tmp/gossh"))
+	}
+
+	for _, arg := range args {
+		cfg, err := c.ConfigCallback(ctx, "tcp", arg)
+		if err != nil {
+			return err
+		}
+
+		_ = cfg
+	}
+
+	_ = c
 
 	return nil
-}
-
-func (a *app) parseConfigFile() (*sshfile.Config, error) {
-	f, err := os.Open(a.configfile)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-
-	return sshfile.ParseConfig(f)
 }
 
 func main() {
@@ -82,4 +93,8 @@ func newCommand(a *app) *cobra.Command {
 	a.register(pflag.CommandLine)
 
 	return m
+}
+
+func processContext() context.Context {
+	return context.Background()
 }
