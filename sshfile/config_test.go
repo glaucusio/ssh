@@ -3,7 +3,6 @@ package sshfile_test
 import (
 	"encoding/json"
 	"flag"
-	"os"
 	"testing"
 	"time"
 
@@ -13,8 +12,11 @@ import (
 
 var updateGolden = flag.Bool("update-golden", false, "Update golden files")
 
-func TestHostConfig(t *testing.T) {
-	want := &sshfile.HostConfig{
+func TestHost(t *testing.T) {
+}
+
+func TestConfig(t *testing.T) {
+	want := &sshfile.Config{
 		Port:                  22,
 		StrictHostKeyChecking: sshfile.Boolean(true),
 		GlobalKnownHostsFile:  "/dev/null",
@@ -31,7 +33,7 @@ func TestHostConfig(t *testing.T) {
 		t.Fatalf("json.Marshal()=%s", err)
 	}
 
-	got := new(sshfile.HostConfig)
+	got := new(sshfile.Config)
 
 	if err := json.Unmarshal(p, got); err != nil {
 		t.Fatalf("json.Unmarshal()=%s", err)
@@ -43,44 +45,38 @@ func TestHostConfig(t *testing.T) {
 }
 
 func TestParseConfig(t *testing.T) {
-	f, err := os.Open("testdata/config")
-	if err != nil {
-		t.Fatalf("Open()=%s", err)
-	}
-	defer f.Close()
-
-	got, err := sshfile.ParseConfig(f)
+	got, err := sshfile.ParseConfigFile("testdata/config")
 	if err != nil {
 		t.Fatalf("ParseConfig()=%s", err)
 	}
 
 	if *updateGolden {
-		if err := MarshalFile(got.Hosts(), "testdata/config.golden"); err != nil {
+		if err := MarshalFile(got, "testdata/config.golden"); err != nil {
 			t.Fatalf("MarshalFile()=%s", err)
 		}
 
 		return
 	}
 
-	var want sshfile.Hosts
+	var want sshfile.Configs
 
 	if err := UnmarshalFile("testdata/config.golden", &want); err != nil {
 		t.Fatalf("UnmarshalFile()=%s", err)
 	}
 
-	if got := got.Hosts(); !cmp.Equal(got, want) {
+	if got := got; !cmp.Equal(got, want) {
 		t.Fatalf("got != want:\n%s\n", cmp.Diff(got, want))
 	}
 }
 
-func TestParseFlags(t *testing.T) {
+func TestParseArgs(t *testing.T) {
 	var tests [][]string
 
 	if err := UnmarshalFile("testdata/flags.json", &tests); err != nil {
 		t.Fatalf("UnmarshalFile()=%s", err)
 	}
 
-	var wants []*sshfile.HostConfig
+	var wants []*sshfile.Config
 
 	if !*updateGolden {
 		if err := UnmarshalFile("testdata/flags.golden.json", &wants); err != nil {
@@ -90,9 +86,9 @@ func TestParseFlags(t *testing.T) {
 
 	for i, flags := range tests {
 		t.Run("", func(t *testing.T) {
-			got, err := sshfile.ParseFlags(flags)
+			got, err := sshfile.ParseArgs(flags)
 			if err != nil {
-				t.Fatalf("ParseFlags()=%s", err)
+				t.Fatalf("ParseArgs()=%s", err)
 			}
 
 			if *updateGolden {
@@ -111,4 +107,8 @@ func TestParseFlags(t *testing.T) {
 			t.Fatalf("MarshalFile()=%s", err)
 		}
 	}
+}
+
+func TestConfigsMerge(t *testing.T) {
+
 }
