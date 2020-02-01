@@ -8,5 +8,4 @@ require (
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/pflag v1.0.5
 	golang.org/x/crypto v0.0.0-20200109152110-61a87790db17
-	golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543
 )
