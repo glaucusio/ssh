@@ -184,7 +184,7 @@ type Configs []*Config
 func (c Configs) Callback() ssh.ConfigCallback {
 	var callbacks []ssh.ConfigCallback
 
-	for _, c := range c {
+	for _, c := range c.fat() {
 		callbacks = append(callbacks, c.Callback())
 	}
 
@@ -194,47 +194,73 @@ func (c Configs) Callback() ssh.ConfigCallback {
 func (c Configs) LazyCallback() ssh.ConfigCallback {
 	var fns []func() ssh.ConfigCallback
 
-	for _, c := range c {
+	for _, c := range c.fat() {
 		fns = append(fns, c.Callback)
 	}
 
 	return sshutil.LazyCallback(fns...)
 }
 
-func debug(text string, v interface{}) {
-	fmt.Printf("(DEBUG) %s = ", text)
-	enc := json.NewEncoder(os.Stdout)
-	enc.SetIndent("", "\t")
-	enc.Encode(v)
-}
+var _ = Configs(nil).Merge(nil)
 
 func (c Configs) Merge(in Configs) Configs {
-	merged := make(Configs, len(c)+len(in))
+	var merged, global []*Config
 
-	debug("c", c)
-	debug("in", in)
-
-	if len(c) > 0 {
-		if c[len(c)-1].Host.Equal(globalHost) {
-			merged[len(merged)-2] = c[len(c)-1]
+	for i := range c {
+		if c[i].Host.Equal(globalHost) {
+			global = append(global, c[i])
+		} else {
+			merged = append(merged, c[i])
 		}
-
-		copy(merged, c[:len(c)-1])
 	}
 
-	debug("merged", merged)
-
-	if len(in) > 0 {
-		if in[len(in)-1].Host.Equal(globalHost) {
-			merged[len(merged)-1] = in[len(in)-1]
+	for i := range in {
+		if in[i].Host.Equal(globalHost) {
+			global = append(global, in[i])
+		} else {
+			merged = append(merged, in[i])
 		}
-
-		copy(merged[len(c):], in[:len(in)-1])
 	}
 
-	debug("merged", merged)
+	if len(global) != 0 {
+		g := global[0]
+
+		for i := len(global) - 1; i > 1; i-- {
+			if err := g.Merge(global[i]); err != nil {
+				panic("unexpected error: " + err.Error())
+			}
+		}
+
+		merged = append(merged, g)
+	}
 
 	return merged
+}
+
+func (c Configs) fat() Configs {
+	c = c.clone()
+
+	for i := len(c) - 1; i > 0; i-- {
+		g := c[i]
+
+		if !g.Host.Equal(globalHost) {
+			continue
+		}
+
+		for i := range c {
+			g := g.clone()
+
+			if err := g.Merge(c[i]); err != nil {
+				panic("unexpected error: " + err.Error())
+			}
+
+			c[i] = g
+		}
+
+		return c
+	}
+
+	return c
 }
 
 func (c Configs) append(cfg *Config, hosts ...Host) Configs {
@@ -246,6 +272,16 @@ func (c Configs) append(cfg *Config, hosts ...Host) Configs {
 	}
 
 	return c
+}
+
+func (c Configs) clone() Configs {
+	var cCopy Configs
+
+	if err := merge(&cCopy, c); err != nil {
+		panic("unexpected error: " + err.Error())
+	}
+
+	return cCopy
 }
 
 var globToRegexp = strings.NewReplacer(

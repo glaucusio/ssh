@@ -4,14 +4,19 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
+	"os"
 
 	"github.com/glaucusio/ssh"
 	"github.com/glaucusio/ssh/sshfile"
 )
 
-var _ = Debug("")
+var _ = Debug("/tmp")
 
 func Debug(tmpdir string) *ClientTrace {
+	if err := os.MkdirAll(tmpdir, 0755); err != nil {
+		panic("unexpected error: " + err.Error())
+	}
+
 	dir, err := ioutil.TempDir(tmpdir, "glaucos-ssh")
 	if err != nil {
 		panic("unexpected error: " + err.Error())
