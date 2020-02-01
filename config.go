@@ -1,13 +1,28 @@
 package ssh
 
-import "golang.org/x/crypto/ssh"
+import (
+	"context"
+	"time"
+
+	"golang.org/x/crypto/ssh"
+)
 
 type Option interface {
 	Apply(*Config) *Config
 }
 
+type Heartbeat struct {
+	Interval time.Duration
+	MaxCount int
+}
+
 type Config struct {
-	ssh.ClientConfig
+	ssh.ClientConfig `json:"-" yaml:"-"`
+
+	Network     string
+	Address     string
+	KeepAlive   bool
+	ServerAlive Heartbeat
 }
 
 func (cfg *Config) With(opts ...Option) *Config {
@@ -20,4 +35,10 @@ func (cfg *Config) With(opts ...Option) *Config {
 func (cfg *Config) WithAuth(methods ...ssh.AuthMethod) *Config {
 	cfg.ClientConfig.Auth = append(cfg.ClientConfig.Auth, methods...)
 	return cfg
+}
+
+var _ = &Client{ConfigCallback: new(Config).Callback()}
+
+func (cfg *Config) Callback() ConfigCallback {
+	return func(context.Context, string, string) (*Config, error) { return cfg, nil }
 }

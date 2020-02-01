@@ -1,14 +1,14 @@
 package ssh
 
+import (
+	"context"
+	"errors"
+)
+
+var ErrConfigNotFound = errors.New("config not found")
+
+type ConfigCallback func(ctx context.Context, network, address string) (*Config, error)
+
 type Client struct {
-}
-
-func NewClient(cfg *Config) (*Client, error) {
-	c := &Client{}
-
-	return c, nil
-}
-
-func (c *Client) Connect() (*Session, error) {
-	return nil, nil
+	ConfigCallback ConfigCallback
 }
