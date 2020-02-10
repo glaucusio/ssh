@@ -2,15 +2,11 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
 
-	"github.com/glaucusio/ssh"
-	"github.com/glaucusio/ssh/sshfile"
 	"github.com/glaucusio/ssh/sshos"
 	"github.com/glaucusio/ssh/sshtrace"
-	"github.com/glaucusio/ssh/sshutil"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -22,35 +18,21 @@ func die(v interface{}) {
 }
 
 type app struct {
-	configfile    string
-	identityfiles []string
-	options       []string
-	verbose       bool
+	*sshos.Loader
+	verbose bool
 }
 
 func (a *app) register(f *pflag.FlagSet) {
-	f.StringVarP(&a.configfile, "config", "F", "", "")
-	f.StringArrayVarP(&a.identityfiles, "identity", "i", nil, "")
-	f.StringArrayVarP(&a.options, "option", "o", nil, "")
+	f.StringVarP(&a.UserConfig, "config", "F", a.UserConfig, "")
+	f.StringArrayVarP(&a.Identity, "identity", "i", a.Identity, "")
+	f.StringArrayVarP(&a.Options, "option", "o", a.Options, "")
 	f.BoolVarP(&a.verbose, "verbose", "v", false, "")
 }
 
 func (a *app) run(cmd *cobra.Command, args []string) error {
-	auth, err := sshfile.IdentityAuth(a.identityfiles...)
-	if err != nil && !errors.Is(err, sshfile.NoAuthMethods) {
-		return err
-	}
-
-	c, err := sshos.NewClient(a.configfile, a.options)
+	c, err := sshos.NewClient()
 	if err != nil {
 		return err
-	}
-
-	if auth != nil {
-		c.ConfigCallback = sshutil.PatchCallback(c.ConfigCallback, func(_ context.Context, cfg *ssh.Config) error {
-			cfg.Auth = append(cfg.Auth, auth)
-			return nil
-		})
 	}
 
 	ctx := processContext()
@@ -74,7 +56,9 @@ func (a *app) run(cmd *cobra.Command, args []string) error {
 }
 
 func main() {
-	app := new(app)
+	app := &app{
+		Loader: sshos.DefaultLoader,
+	}
 	cmd := newCommand(app)
 
 	if err := cmd.Execute(); err != nil {
