@@ -8,6 +8,8 @@ import (
 	"testing"
 )
 
+var updateGolden = flag.Bool("update-golden", false, "Update golden files")
+
 func UnmarshalFile(file string, v interface{}) error {
 	f, err := os.Open(file)
 	if err != nil {

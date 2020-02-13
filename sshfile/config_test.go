@@ -2,18 +2,12 @@ package sshfile_test
 
 import (
 	"encoding/json"
-	"flag"
 	"testing"
 	"time"
 
 	"github.com/glaucusio/ssh/sshfile"
 	"github.com/google/go-cmp/cmp"
 )
-
-var updateGolden = flag.Bool("update-golden", false, "Update golden files")
-
-func TestHost(t *testing.T) {
-}
 
 func TestConfig(t *testing.T) {
 	want := &sshfile.Config{
@@ -107,8 +101,4 @@ func TestParseArgs(t *testing.T) {
 			t.Fatalf("MarshalFile()=%s", err)
 		}
 	}
-}
-
-func TestConfigsMerge(t *testing.T) {
-
 }
