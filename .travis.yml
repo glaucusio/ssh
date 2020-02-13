@@ -2,3 +2,10 @@ language: go
 
 go:
 - 1.13.x
+
+script:
+- go test -race ./...
+- go test -race -coverprofile=coverage.txt -covermode=atomic ./sshfile
+
+after_success:
+- bash <(curl -s https://codecov.io/bash)
